@@ -19,7 +19,7 @@ import { GiftPurchase } from './common/entities/gift-purchase.entity';
 
 @Module({
     imports: [
-        ConfigModule.forRoot({ isGlobal: true, envFilePath: '../.env' }),
+        ConfigModule.forRoot({ isGlobal: true }),
         ScheduleModule.forRoot(),
         TypeOrmModule.forRootAsync({
             inject: [ConfigService],
