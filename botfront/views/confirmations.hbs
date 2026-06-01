@@ -1,0 +1,117 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Bonus tasdiqlash</h2>
+      <p class="page-sub">Foydalanuvchi chek yoki isbot rasmini yuborgan xaridlar. Bonus faqat siz tasdiqlaganingizdan keyin hisobga olinadi.</p>
+    </div>
+  </div>
+
+  {{#if approved}}<div class="alert alert-success">Bonus tasdiqlandi va foydalanuvchi hisobiga qo‘shildi.</div>{{/if}}
+  {{#if rejected}}<div class="alert alert-warning">Bonus rad etildi.</div>{{/if}}
+
+  <div class="tabs">
+    <a class="tab {{#if (eq data.status 'pending')}}is-active{{/if}}" href="/confirmations?status=pending">
+      Kutilmoqda <span class="tab-count">{{data.counts.pending}}</span>
+    </a>
+    <a class="tab {{#if (eq data.status 'approved')}}is-active{{/if}}" href="/confirmations?status=approved">
+      Tasdiqlangan <span class="tab-count">{{data.counts.approved}}</span>
+    </a>
+    <a class="tab {{#if (eq data.status 'rejected')}}is-active{{/if}}" href="/confirmations?status=rejected">
+      Rad etilgan <span class="tab-count">{{data.counts.rejected}}</span>
+    </a>
+    <a class="tab {{#if (eq data.status 'all')}}is-active{{/if}}" href="/confirmations?status=all">
+      Hammasi <span class="tab-count">{{data.counts.total}}</span>
+    </a>
+  </div>
+
+  <div class="card">
+    {{#if data.items.length}}
+      <div class="confirm-list">
+        {{#each data.items}}
+          <div class="confirm-item">
+            <a class="confirm-proof" href="{{#if proofImage}}{{proofImage}}{{else}}#{{/if}}" {{#if proofImage}}target="_blank" rel="noopener"{{/if}}>
+              {{#if proofImage}}
+                <img src="{{proofImage}}" alt="Isbot rasmi" onerror="this.src='/img/placeholder.svg';" />
+              {{else}}
+                <span class="confirm-proof-empty">Rasm yo‘q</span>
+              {{/if}}
+            </a>
+
+            <div class="confirm-main">
+              <div class="confirm-row">
+                {{#if user}}
+                  <a class="confirm-user" href="/users/{{user.id}}">
+                    {{#if user.firstName}}{{user.firstName}} {{/if}}{{#if user.lastName}}{{user.lastName}}{{/if}}
+                    {{#unless user.firstName}}{{#unless user.lastName}}Foydalanuvchi{{/unless}}{{/unless}}
+                  </a>
+                  {{#if user.phone}}<code>{{user.phone}}</code>{{/if}}
+                {{else}}
+                  <span class="muted">[foydalanuvchi o‘chirilgan]</span>
+                {{/if}}
+                {{#if (eq status 'pending')}}<span class="status-badge status-pending">Kutilmoqda</span>{{/if}}
+                {{#if (eq status 'approved')}}<span class="status-badge status-approved">Tasdiqlangan</span>{{/if}}
+                {{#if (eq status 'rejected')}}<span class="status-badge status-rejected">Rad etilgan</span>{{/if}}
+              </div>
+
+              <div class="confirm-row">
+                {{#if product}}
+                  <strong>{{product.title}}</strong>
+                  {{#if product.uzum_url}}
+                    <a class="product-link" href="{{product.uzum_url}}" target="_blank" rel="noopener">Uzum</a>
+                  {{/if}}
+                {{else}}
+                  <span class="muted">[mahsulot o‘chirilgan]</span>
+                {{/if}}
+                <span class="bonus-pill">+{{formatPrice bonus}} bonus</span>
+              </div>
+
+              {{#if reviewComment}}
+                <div class="confirm-comment">“{{reviewComment}}”</div>
+              {{/if}}
+
+              <div class="confirm-meta muted">
+                Yuborilgan: {{formatDate createdAt}}
+                {{#if reviewSubmitted}} • <span class="confirm-flag">Xarid belgilangan</span>{{/if}}
+                {{#if reviewedAt}} • Ko‘rib chiqilgan: {{formatDate reviewedAt}}{{/if}}
+              </div>
+              {{#if reviewNote}}<div class="confirm-meta muted">Admin izohi: {{reviewNote}}</div>{{/if}}
+            </div>
+
+            {{#if (eq status 'pending')}}
+              <div class="confirm-actions">
+                <form method="POST" action="/confirmations/{{id}}/approve?status={{../data.status}}">
+                  <button type="submit" class="btn btn-sm btn-success btn-block">Tasdiqlash</button>
+                </form>
+                <form method="POST" action="/confirmations/{{id}}/reject?status={{../data.status}}"
+                      data-confirm="Bu xarid bonusini rad etishni tasdiqlaysizmi?">
+                  <textarea class="input" name="note" rows="2" placeholder="Rad etish sababi (ixtiyoriy)…" style="resize:vertical;font-size:0.85rem;margin-bottom:6px;"></textarea>
+                  <button type="submit" class="btn btn-sm btn-danger btn-block">Rad etish</button>
+                </form>
+              </div>
+            {{/if}}
+          </div>
+        {{/each}}
+      </div>
+
+      {{#if (ne data.totalPages 1)}}
+        <div class="pagination">
+          <span class="pagination-info">Jami: <b>{{data.total}}</b></span>
+          <div class="pagination-controls">
+            <a class="page-link {{#unless data.hasPrev}}is-disabled{{/unless}}"
+               href="?status={{data.status}}&page={{data.prevPage}}&limit={{data.limit}}">←</a>
+            <span class="page-link is-current">{{data.page}} / {{data.totalPages}}</span>
+            <a class="page-link {{#unless data.hasNext}}is-disabled{{/unless}}"
+               href="?status={{data.status}}&page={{data.nextPage}}&limit={{data.limit}}">→</a>
+          </div>
+        </div>
+      {{/if}}
+    {{else}}
+      <div class="empty">
+        <div class="empty-title">Yozuv topilmadi</div>
+        <div class="empty-sub">
+          {{#if (eq data.status 'pending')}}Tasdiqlanishi kutilayotgan bonuslar yo‘q.{{else}}Bu holatda yozuv yo‘q.{{/if}}
+        </div>
+      </div>
+    {{/if}}
+  </div>
+</div>

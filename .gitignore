@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+sessions.json
+*.log
+src/**/*.js
+src/**/*.js.map
+public/avatars/*.jpg
+public/avatars/*.jpeg
+public/avatars/*.png
+public/avatars/*.webp

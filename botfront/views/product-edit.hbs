@@ -1,0 +1,318 @@
+<div class="page page-narrow">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">
+        {{#if (eq mode 'edit')}}Mahsulotni tahrirlash{{else}}Mahsulot qo'shish{{/if}}
+      </h2>
+      <p class="page-sub">Asosiy ma'lumotlar va ijtimoiy tarmoq havolalari</p>
+    </div>
+    <a class="btn btn-ghost" href="/products">← Ro'yxatga qaytish</a>
+  </div>
+
+  {{#if error}}<div class="alert alert-error">{{error}}</div>{{/if}}
+
+  <form method="POST"
+        action="{{#if (eq mode 'edit')}}/products/{{product.id}}{{else}}/products/new{{/if}}">
+
+    {{! === Asosiy ma'lumotlar === }}
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header"><h3 class="card-title">📦 Asosiy ma'lumotlar</h3></div>
+      <div class="form">
+
+        <label class="field">
+          <span class="field-label">Nomi <span class="req">*</span></span>
+          <input class="input" type="text" name="title"
+                 value="{{product.title}}" required placeholder="Mahsulot nomi">
+        </label>
+
+        <label class="field">
+          <span class="field-label">Bonus miqdori <span class="req">*</span></span>
+          <input class="input" type="number" name="bonus"
+                 value="{{product.bonus}}" min="0" step="1" required
+                 placeholder="Xarid tasdiqlanganda beriladigan bonus"
+                 style="max-width:200px">
+          <span class="field-hint">Ball — xarid tasdiqlangach foydalanuvchi hisobiga qo'shiladi</span>
+        </label>
+
+      </div>
+    </div>
+
+    {{! === Havolalar === }}
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header">
+        <h3 class="card-title">🔗 Havolalar</h3>
+        <span class="badge badge-muted">Uzum majburiy · Telegram/Instagram ixtiyoriy</span>
+      </div>
+      <div class="form" style="gap:0;padding:0">
+
+        {{! — Uzum — }}
+        <div class="link-row" id="row-uzum">
+          <div class="link-row-head" onclick="toggleRow('uzum')">
+            <div class="link-row-left">
+              <span class="link-icon uzum-icon">🍇</span>
+              <div>
+                <div class="link-row-title">Uzum Market URL <span class="req">*</span></div>
+                <div class="link-row-val" id="val-uzum">
+                  {{#if product.uzum_url}}{{product.uzum_url}}{{else}}Havola qo'shish…{{/if}}
+                </div>
+              </div>
+            </div>
+            <span class="link-chevron" id="chev-uzum">▾</span>
+          </div>
+          <div class="link-row-body" id="body-uzum">
+            <input class="input" type="url" name="uzum_url"
+                   id="inp-uzum"
+                   value="{{product.uzum_url}}"
+                   placeholder="https://uzum.uz/uz/product/…"
+                   required
+                   oninput="previewVal('uzum',this.value,'Uzum Market URL')">
+            <span class="field-hint">Mahsulotning Uzum Market sahifasi havolasi</span>
+          </div>
+        </div>
+        <div class="link-divider"></div>
+
+        {{! — Telegram — }}
+        <div class="link-row" id="row-tg">
+          <div class="link-row-head" onclick="toggleRow('tg')">
+            <div class="link-row-left">
+              <span class="link-icon tg-icon2">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="#2AABEE"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.088 14.49l-2.95-.924c-.642-.204-.655-.642.136-.953l11.57-4.461c.537-.194 1.006.131.718.096z"/></svg>
+              </span>
+              <div>
+                <div class="link-row-title">Telegram kanal</div>
+                <div class="link-row-val" id="val-tg">
+                  {{#if product.telegramChannel}}{{product.telegramChannel}}{{else}}Havola qo'shish…{{/if}}
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              {{#if product.telegramChannel}}
+                <span class="link-active-dot"></span>
+              {{/if}}
+              <span class="link-chevron" id="chev-tg">▾</span>
+            </div>
+          </div>
+          <div class="link-row-body" id="body-tg" style="display:none">
+            <input class="input" type="url" name="telegramChannel"
+                   id="inp-tg"
+                   value="{{product.telegramChannel}}"
+                   placeholder="https://t.me/kanalim"
+                   oninput="previewVal('tg',this.value,'Telegram kanal')">
+            <span class="field-hint">Masalan: https://t.me/uzum_official</span>
+          </div>
+        </div>
+        <div class="link-divider"></div>
+
+        {{! — Instagram — }}
+        <div class="link-row" id="row-ig">
+          <div class="link-row-head" onclick="toggleRow('ig')">
+            <div class="link-row-left">
+              <span class="link-icon ig-icon2">
+                <svg viewBox="0 0 24 24" width="18" height="18"><defs><linearGradient id="igG" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#FFDC80"/><stop offset="40%" stop-color="#F77737"/><stop offset="70%" stop-color="#C13584"/><stop offset="100%" stop-color="#833AB4"/></linearGradient></defs><path fill="url(#igG)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+              </span>
+              <div>
+                <div class="link-row-title">Instagram sahifasi</div>
+                <div class="link-row-val" id="val-ig">
+                  {{#if product.instagram}}{{product.instagram}}{{else}}Havola qo'shish…{{/if}}
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              {{#if product.instagram}}
+                <span class="link-active-dot ig-dot"></span>
+              {{/if}}
+              <span class="link-chevron" id="chev-ig">▾</span>
+            </div>
+          </div>
+          <div class="link-row-body" id="body-ig" style="display:none">
+            <input class="input" type="url" name="instagram"
+                   id="inp-ig"
+                   value="{{product.instagram}}"
+                   placeholder="https://instagram.com/sahifa"
+                   oninput="previewVal('ig',this.value,'Instagram sahifasi')">
+            <span class="field-hint">Masalan: https://instagram.com/uzummarket</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    {{! === Rasm === }}
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header"><h3 class="card-title">🖼 Rasm</h3></div>
+      <div class="form">
+        <label class="field">
+          <span class="field-label">Rasm <span class="field-hint" style="font-weight:400">(ixtiyoriy)</span></span>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <input type="file" id="imgFile" accept="image/jpeg,image/png,image/webp" style="display:none">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('imgFile').click()">
+              📁 Rasm yuklash
+            </button>
+            <span id="imgUploadStatus" style="font-size:13px;color:var(--muted)"></span>
+          </div>
+          <input class="input" type="url" name="image" id="imageUrlInput"
+                 value="{{product.image}}"
+                 placeholder="ImgBB dan yuklang yoki URL yozing"
+                 oninput="updatePreview(this.value)">
+        </label>
+        <div id="imgPreviewWrap" style="{{#unless product.image}}display:none{{/unless}}">
+          <img id="imgPreview" src="{{product.image}}" alt="preview"
+               style="width:100px;height:100px;object-fit:cover;border-radius:8px;border:1px solid var(--border)"
+               onerror="this.style.display='none'">
+        </div>
+      </div>
+    </div>
+
+    {{! === Majburiy obuna === }}
+    <div class="card" style="margin-bottom:24px">
+      <div class="card-header"><h3 class="card-title">⚙️ Sozlamalar</h3></div>
+      <div class="form">
+        <div class="toggle-row">
+          <div>
+            <span class="field-label">Majburiy obuna</span>
+            <p class="field-hint" style="margin:3px 0 0">
+              Yoqilsa — foydalanuvchi Telegram kanalga obuna bo'lmasa,
+              chek yuborishda ogohlantirish ko'rsatiladi
+            </p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" name="requireChannel" value="on"
+                   {{#if product.requireChannel}}checked{{/if}}>
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions" style="padding:0 0 32px">
+      <a class="btn btn-ghost" href="/products">Bekor qilish</a>
+      <button class="btn btn-primary" type="submit">
+        {{#if (eq mode 'edit')}}💾 Saqlash{{else}}➕ Qo'shish{{/if}}
+      </button>
+    </div>
+  </form>
+</div>
+
+<style>
+/* Link row (Uzum selpa uslubi) */
+.link-row { background:#fff; }
+.link-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  cursor: pointer;
+  user-select: none;
+  transition: background .15s;
+}
+.link-row-head:hover { background: #f8fafc; }
+.link-row-left { display:flex; align-items:center; gap:12px; }
+.link-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.uzum-icon { background:#fff7ed; }
+.tg-icon2  { background:#e0f2fe; }
+.ig-icon2  { background:#fdf2f8; }
+.link-row-title {
+  font-size: 14px; font-weight: 600;
+  color: var(--text, #1e293b);
+  line-height: 1.3;
+}
+.link-row-val {
+  font-size: 12.5px;
+  color: var(--muted, #64748b);
+  margin-top: 2px;
+  max-width: 340px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.link-chevron {
+  font-size: 16px; color: var(--muted); transition: transform .2s;
+}
+.link-chevron.open { transform: rotate(180deg); }
+.link-row-body {
+  padding: 4px 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.link-divider { height:1px; background: var(--border, #e2e8f0); margin:0; }
+.link-active-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #2AABEE; display: inline-block; flex-shrink:0;
+}
+.ig-dot { background: #C13584; }
+</style>
+
+<script>
+const openRows = { uzum: true, tg: false, ig: false };
+
+function toggleRow(key) {
+  openRows[key] = !openRows[key];
+  const body  = document.getElementById('body-' + key);
+  const chev  = document.getElementById('chev-' + key);
+  body.style.display = openRows[key] ? 'flex' : 'none';
+  if (openRows[key]) {
+    chev.classList.add('open');
+    document.getElementById('inp-' + key)?.focus();
+  } else {
+    chev.classList.remove('open');
+  }
+}
+
+function previewVal(key, val, label) {
+  const el = document.getElementById('val-' + key);
+  if (!el) return;
+  el.textContent = val.trim() || (label + ' qo\'shish…');
+}
+
+function updatePreview(val) {
+  const wrap = document.getElementById('imgPreviewWrap');
+  const img  = document.getElementById('imgPreview');
+  if (val.trim()) {
+    wrap.style.display = 'block';
+    img.style.display  = 'block';
+    img.src = val.trim();
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+// ImgBB yuklash
+document.getElementById('imgFile').addEventListener('change', async function() {
+  const file = this.files[0];
+  if (!file) return;
+  const status = document.getElementById('imgUploadStatus');
+  status.textContent = 'Yuklanmoqda...';
+  const fd = new FormData();
+  fd.append('image', file);
+  try {
+    const res = await fetch('/api/upload-image', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('imageUrlInput').value = data.url;
+      updatePreview(data.url);
+      status.textContent = '✅ Yuklandi';
+    } else {
+      status.textContent = '❌ ' + (data.error || 'Xatolik');
+    }
+  } catch { status.textContent = '❌ Yuklashda xatolik'; }
+  this.value = '';
+});
+
+// Uzum dastlab ochiq
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('body-uzum').style.display = 'flex';
+  document.getElementById('chev-uzum').classList.add('open');
+
+  // Agar Telegram/Instagram qiymati bo'lsa, ochiq ko'rsatish
+  const tgVal = document.getElementById('inp-tg')?.value;
+  const igVal = document.getElementById('inp-ig')?.value;
+  if (tgVal) { openRows.tg = true; document.getElementById('body-tg').style.display='flex'; document.getElementById('chev-tg').classList.add('open'); }
+  if (igVal) { openRows.ig = true; document.getElementById('body-ig').style.display='flex'; document.getElementById('chev-ig').classList.add('open'); }
+});
+</script>

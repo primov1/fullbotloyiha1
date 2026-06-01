@@ -1,0 +1,38 @@
+<div class="page page-narrow">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Foydalanuvchini tahrirlash</h2>
+      <p class="page-sub">Ism, familiya yoki telefon raqamni o‘zgartirish</p>
+    </div>
+    <a class="btn btn-ghost" href="/users">← Ro‘yxatga qaytish</a>
+  </div>
+
+  <div class="card">
+    <form method="POST" action="/users/{{user.id}}" class="form">
+      <div class="grid-2">
+        <label class="field">
+          <span class="field-label">Ism</span>
+          <input class="input" type="text" name="firstName" value="{{user.firstName}}" />
+        </label>
+        <label class="field">
+          <span class="field-label">Familiya</span>
+          <input class="input" type="text" name="lastName" value="{{user.lastName}}" />
+        </label>
+      </div>
+      <label class="field">
+        <span class="field-label">Telefon raqam</span>
+        <input class="input" type="text" name="phone" value="{{user.phone}}" placeholder="+998..." />
+      </label>
+
+      <div class="field">
+        <span class="field-label">Username</span>
+        <div class="readonly">{{#if user.username}}@{{user.username}}{{else}}—{{/if}}</div>
+      </div>
+
+      <div class="form-actions">
+        <a class="btn btn-ghost" href="/users">Bekor qilish</a>
+        <button class="btn btn-primary" type="submit">Saqlash</button>
+      </div>
+    </form>
+  </div>
+</div>

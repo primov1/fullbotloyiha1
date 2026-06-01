@@ -1,0 +1,91 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Mahsulotlar</h2>
+      <p class="page-sub">Mahsulotlar ro'yxati va ijtimoiy tarmoq havolalari</p>
+    </div>
+    <a class="btn btn-primary" href="/products/new">+ Yangi mahsulot</a>
+  </div>
+
+  {{#if created}}<div class="alert alert-success">Yangi mahsulot qo'shildi.</div>{{/if}}
+  {{#if updated}}<div class="alert alert-success">Mahsulot yangilandi.</div>{{/if}}
+  {{#if deleted}}<div class="alert alert-warning">Mahsulot o'chirildi.</div>{{/if}}
+
+  <div class="toolbar">
+    <form method="GET" action="/products" class="search">
+      <input class="input" type="text" name="q" value="{{data.q}}" placeholder="Nomi bo'yicha qidirish…" />
+      <button class="btn btn-primary" type="submit">Qidirish</button>
+      {{#if data.q}}<a class="btn btn-ghost" href="/products">Tozalash</a>{{/if}}
+    </form>
+  </div>
+
+  <div class="card">
+    {{#if data.items.length}}
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="num">#</th>
+              <th>Rasm</th>
+              <th>Nomi</th>
+              <th>Bonus</th>
+              <th>Havolalar</th>
+              <th>Qo'shilgan</th>
+              <th class="actions">Amallar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each data.items}}
+              <tr>
+                <td class="num">{{inc @index}}</td>
+                <td>
+                  {{#if image}}
+                    <img src="{{image}}" alt="{{title}}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;" onerror="this.src='/img/placeholder.svg';" />
+                  {{else}}
+                    <img src="/img/placeholder.svg" alt="rasm yo'q" style="width:40px;height:40px;opacity:.4;" />
+                  {{/if}}
+                </td>
+                <td>
+                  <strong>{{title}}</strong>
+                  {{#if requireChannel}}<span class="status-badge status-pending" style="font-size:11px;margin-left:4px">Majburiy obuna</span>{{/if}}
+                </td>
+                <td><span class="bonus-pill">+{{formatPrice bonus}}</span></td>
+                <td>
+                  <div style="display:flex;flex-direction:column;gap:4px">
+                    <a class="social-link uzum-link" href="{{uzum_url}}" target="_blank" rel="noopener">
+                      🍇 Uzum
+                    </a>
+                    {{#if telegramChannel}}
+                    <a class="social-link tg-link" href="{{telegramChannel}}" target="_blank" rel="noopener">
+                      ✈️ Telegram
+                    </a>
+                    {{/if}}
+                    {{#if instagram}}
+                    <a class="social-link ig-link" href="{{instagram}}" target="_blank" rel="noopener">
+                      📸 Instagram
+                    </a>
+                    {{/if}}
+                  </div>
+                </td>
+                <td class="muted">{{formatDate createdAt}}</td>
+                <td class="actions">
+                  <a class="btn btn-sm btn-ghost" href="/products/{{id}}/edit">Tahrirlash</a>
+                  <form method="POST" action="/products/{{id}}/delete" data-confirm="Mahsulotni o'chirishni tasdiqlaysizmi?">
+                    <button type="submit" class="btn btn-sm btn-danger">O'chirish</button>
+                  </form>
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+      {{> pagination}}
+    {{else}}
+      <div class="empty">
+        <div class="empty-title">Mahsulot topilmadi</div>
+        <div class="empty-sub">{{#if data.q}}Qidiruvga mos mahsulot yo'q.{{else}}Birinchi mahsulotingizni qo'shing.{{/if}}</div>
+        <a class="btn btn-primary" href="/products/new">+ Mahsulot qo'shish</a>
+      </div>
+    {{/if}}
+  </div>
+</div>

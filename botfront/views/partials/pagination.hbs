@@ -1,0 +1,14 @@
+{{#if data.totalPages}}
+  {{#if (ne data.totalPages 1)}}
+    <div class="pagination">
+      <span class="pagination-info">Jami: <b>{{data.total}}</b></span>
+      <div class="pagination-controls">
+        <a class="page-link {{#unless data.hasPrev}}is-disabled{{/unless}}"
+           href="?q={{data.q}}&page={{data.prevPage}}&limit={{data.limit}}">←</a>
+        <span class="page-link is-current">{{data.page}} / {{data.totalPages}}</span>
+        <a class="page-link {{#unless data.hasNext}}is-disabled{{/unless}}"
+           href="?q={{data.q}}&page={{data.nextPage}}&limit={{data.limit}}">→</a>
+      </div>
+    </div>
+  {{/if}}
+{{/if}}

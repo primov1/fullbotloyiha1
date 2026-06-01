@@ -1,0 +1,15 @@
+<header class="topbar">
+  <h1 class="topbar-title">{{title}}</h1>
+  <div class="topbar-actions">
+    <a class="topbar-admin" href="/admin/profile">
+      <span class="topbar-avatar">
+        {{#if adminProfile.avatar}}
+          <img src="{{adminProfile.avatar}}" alt="avatar" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">
+        {{else}}
+          {{#if adminProfile.name}}{{adminProfile.name.[0]}}{{else}}A{{/if}}
+        {{/if}}
+      </span>
+      <span>{{#if adminProfile.name}}{{adminProfile.name}}{{else}}admin{{/if}}</span>
+    </a>
+  </div>
+</header>

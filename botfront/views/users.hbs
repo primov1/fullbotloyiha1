@@ -1,0 +1,69 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Foydalanuvchilar</h2>
+      <p class="page-sub">Tizimga ro'yxatdan o'tgan barcha foydalanuvchilar</p>
+    </div>
+  </div>
+
+  {{#if updated}}
+    <div class="alert alert-success">Foydalanuvchi ma'lumotlari yangilandi.</div>
+  {{/if}}
+
+  <div class="toolbar">
+    <form method="GET" action="/users" class="search">
+      <input class="input" type="text" name="q" value="{{data.q}}" placeholder="Ism, familiya yoki telefon bo'yicha qidirish…" />
+      <button class="btn btn-primary" type="submit">Qidirish</button>
+      {{#if data.q}}
+        <a class="btn btn-ghost" href="/users">Tozalash</a>
+      {{/if}}
+    </form>
+    <a class="btn btn-ghost" href="/users/export{{#if data.q}}?q={{data.q}}{{/if}}">Excel yuklash</a>
+  </div>
+
+  <div class="card">
+    {{#if data.items.length}}
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="num">#</th>
+              <th>Ism</th>
+              <th>Familiya</th>
+              <th>Telefon</th>
+              <th>Username</th>
+              <th>Sana</th>
+              <th class="actions">Amallar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each data.items}}
+              <tr>
+                <td class="num">{{inc @index}}</td>
+                <td>{{#if firstName}}{{firstName}}{{else}}<span class="muted">—</span>{{/if}}</td>
+                <td>{{#if lastName}}{{lastName}}{{else}}<span class="muted">—</span>{{/if}}</td>
+                <td>{{#if phone}}<code>{{phone}}</code>{{else}}<span class="muted">—</span>{{/if}}</td>
+                <td>{{#if username}}@{{username}}{{else}}<span class="muted">—</span>{{/if}}</td>
+                <td class="muted">{{formatDate createdAt}}</td>
+                <td class="actions">
+                  <a class="btn btn-sm btn-ghost" href="/users/{{id}}">Profil</a>
+                  <a class="btn btn-sm btn-ghost" href="/users/{{id}}/edit">Tahrirlash</a>
+                  <form method="POST" action="/users/{{id}}/delete" style="display:inline"
+                        data-confirm="Foydalanuvchini o'chirishni tasdiqlaysizmi? Barcha xarid tarixi ham o'chiriladi.">
+                    <button type="submit" class="btn btn-sm btn-danger">O'chirish</button>
+                  </form>
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+      {{> pagination}}
+    {{else}}
+      <div class="empty">
+        <div class="empty-title">Foydalanuvchilar topilmadi</div>
+        <div class="empty-sub">{{#if data.q}}Qidiruv shartlariga mos foydalanuvchi yo'q.{{else}}Hali bironta foydalanuvchi yo'q.{{/if}}</div>
+      </div>
+    {{/if}}
+  </div>
+</div>

@@ -1,0 +1,127 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">
+        {{#if user.firstName}}{{user.firstName}}{{/if}}
+        {{#if user.lastName}}{{user.lastName}}{{/if}}
+        {{#unless user.firstName}}{{#unless user.lastName}}Foydalanuvchi profili{{/unless}}{{/unless}}
+      </h2>
+      <p class="page-sub">
+        {{#if user.phone}}<code>{{user.phone}}</code>{{/if}}
+        {{#if user.username}} • @{{user.username}}{{/if}}
+        {{#if user.telegramId}} • TG ID: {{user.telegramId}}{{/if}}
+        {{#if user.region}} • {{user.region}}{{#if user.district}}, {{user.district}}{{/if}}{{/if}}
+      </p>
+    </div>
+    <div class="page-header-actions">
+      <a class="btn btn-ghost" href="/users">← Ro'yxatga qaytish</a>
+      <a class="btn btn-primary" href="/users/{{user.id}}/edit">Tahrirlash</a>
+      <form method="POST" action="/users/{{user.id}}/delete"
+            data-confirm="Foydalanuvchini o'chirishni tasdiqlaysizmi? Barcha xarid tarixi ham o'chiriladi.">
+        <button type="submit" class="btn btn-danger">O'chirish</button>
+      </form>
+    </div>
+  </div>
+
+  {{#if msg_sent}}<div class="alert alert-success">✅ Telegram xabar yuborildi.</div>{{/if}}
+  {{#if msg_error}}<div class="alert alert-error">❌ Xabar yuborishda xatolik.</div>{{/if}}
+
+  <div class="stats">
+    <div class="stat stat-blue">
+      <div class="stat-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+      <div class="stat-body"><div class="stat-label">Sotib olingan</div><div class="stat-value">{{totals.purchases}}</div></div>
+    </div>
+    <div class="stat stat-green">
+      <div class="stat-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+      <div class="stat-body"><div class="stat-label">Tasdiqlangan bonus</div><div class="stat-value">{{formatPrice totals.bonusEarned}}</div></div>
+    </div>
+    <div class="stat stat-amber">
+      <div class="stat-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      <div class="stat-body"><div class="stat-label">Tasdiq kutilmoqda</div><div class="stat-value">{{formatPrice totals.bonusPending}}</div></div>
+    </div>
+    <div class="stat stat-purple">
+      <div class="stat-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/></svg></div>
+      <div class="stat-body"><div class="stat-label">Olingan sovg'alar</div><div class="stat-value">{{totals.giftPurchases}}</div></div>
+    </div>
+    <div class="stat stat-teal">
+      <div class="stat-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+      <div class="stat-body"><div class="stat-label">Bonus balansi</div><div class="stat-value">{{formatPrice totals.bonusBalance}}</div></div>
+    </div>
+  </div>
+
+  <!-- Telegram xabar yuborish -->
+  {{#if user.telegramId}}
+  <div class="card" style="padding:16px 20px">
+    <div class="card-header" style="padding:0 0 12px;border-bottom:none;">
+      <h3 class="card-title">📨 Telegram xabar yuborish</h3>
+    </div>
+    <form method="POST" action="/broadcast/user/{{user.id}}" class="search" style="gap:8px">
+      <input class="input" type="text" name="message" placeholder="Xabar matni..." required style="flex:1">
+      <button class="btn btn-primary" type="submit">Yuborish</button>
+    </form>
+  </div>
+  {{/if}}
+
+  <div class="profile-grid">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Sotib olingan mahsulotlar</h3>
+        <span class="badge">{{totals.purchases}}</span>
+      </div>
+      {{#if purchases.length}}
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th class="num">#</th><th>Mahsulot</th><th>Bonus</th><th>Holat</th><th>Sana</th><th class="actions">Link</th></tr></thead>
+            <tbody>
+              {{#each purchases}}
+                <tr>
+                  <td class="num">{{inc @index}}</td>
+                  <td>{{#if product}}<strong>{{product.title}}</strong>{{else}}<span class="muted">[mahsulot o'chirilgan]</span>{{/if}}</td>
+                  <td>
+                    {{#if (eq status 'approved')}}<span class="bonus-pill">+{{formatPrice bonus}}</span>
+                    {{else}}<span class="bonus-pill bonus-pill-muted">{{formatPrice bonus}}</span>{{/if}}
+                  </td>
+                  <td>
+                    {{#if (eq status 'pending')}}<span class="status-badge status-pending">Kutilmoqda</span>{{/if}}
+                    {{#if (eq status 'approved')}}<span class="status-badge status-approved">Tasdiqlangan</span>{{/if}}
+                    {{#if (eq status 'rejected')}}<span class="status-badge status-rejected">Rad etilgan</span>{{/if}}
+                  </td>
+                  <td class="muted">{{formatDate createdAt}}</td>
+                  <td class="actions">{{#if product.uzum_url}}<a class="btn btn-sm btn-ghost" href="{{product.uzum_url}}" target="_blank" rel="noopener">Uzum</a>{{else}}—{{/if}}</td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+      {{else}}
+        <div class="empty"><div class="empty-title">Hali sotib olishlar yo'q</div></div>
+      {{/if}}
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Olingan sovg'alar</h3>
+        <span class="badge">{{totals.giftPurchases}}</span>
+      </div>
+      {{#if giftPurchases.length}}
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th class="num">#</th><th>Sovg'a</th><th>Narxi</th><th>Sana</th></tr></thead>
+            <tbody>
+              {{#each giftPurchases}}
+                <tr>
+                  <td class="num">{{inc @index}}</td>
+                  <td>{{#if gift}}<div class="gift-cell">{{#if gift.image}}<img src="{{gift.image}}" alt="{{gift.title}}" onerror="this.src='/img/placeholder.svg';" />{{/if}}<strong>{{gift.title}}</strong></div>{{else}}<span class="muted">[sovg'a o'chirilgan]</span>{{/if}}</td>
+                  <td><span class="price-pill">−{{formatPrice price}}</span></td>
+                  <td class="muted">{{formatDate createdAt}}</td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+      {{else}}
+        <div class="empty"><div class="empty-title">Hali sovg'alar yo'q</div></div>
+      {{/if}}
+    </div>
+  </div>
+</div>

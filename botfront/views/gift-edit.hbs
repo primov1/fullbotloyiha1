@@ -1,0 +1,88 @@
+<div class="page page-narrow">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">{{#if (eq mode 'edit')}}Sovg'ani tahrirlash{{else}}Yangi sovg'a{{/if}}</h2>
+      <p class="page-sub">title, image va price maydonlarini to'ldiring</p>
+    </div>
+    <a class="btn btn-ghost" href="/gifts">← Ro'yxatga qaytish</a>
+  </div>
+
+  {{#if error}}<div class="alert alert-error">{{error}}</div>{{/if}}
+
+  <div class="card">
+    <form method="POST" action="{{#if (eq mode 'edit')}}/gifts/{{gift.id}}{{else}}/gifts/new{{/if}}" class="form">
+      <label class="field">
+        <span class="field-label">Nomi <span class="req">*</span></span>
+        <input class="input" type="text" name="title" value="{{gift.title}}" required />
+      </label>
+
+      <div class="field">
+        <span class="field-label">Rasm <span class="req">*</span></span>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <input type="file" id="imgFile" accept="image/jpeg,image/png,image/webp" style="display:none">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('imgFile').click()">
+            📁 Rasm yuklash
+          </button>
+          <span id="imgUploadStatus" style="font-size:13px;color:var(--muted)"></span>
+        </div>
+        <input class="input" type="url" name="image" id="imageUrlInput"
+               value="{{gift.image}}"
+               placeholder="ImgBB dan yuklang yoki URL yozing"
+               required
+               oninput="updatePreview(this.value)">
+        <div id="imgPreviewWrap" style="margin-top:8px;{{#unless gift.image}}display:none{{/unless}}">
+          <img id="imgPreview" src="{{gift.image}}" alt="preview"
+               style="width:100px;height:100px;object-fit:cover;border-radius:8px;border:1px solid var(--border)"
+               onerror="this.style.display='none'">
+        </div>
+      </div>
+
+      <label class="field">
+        <span class="field-label">Narxi (bonus) <span class="req">*</span></span>
+        <input class="input" type="number" name="price" value="{{gift.price}}" min="0" step="1" required />
+      </label>
+
+      <div class="form-actions">
+        <a class="btn btn-ghost" href="/gifts">Bekor qilish</a>
+        <button class="btn btn-primary" type="submit">
+          {{#if (eq mode 'edit')}}Saqlash{{else}}Qo'shish{{/if}}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+document.getElementById('imgFile').addEventListener('change', async function() {
+  const file = this.files[0];
+  if (!file) return;
+  const status = document.getElementById('imgUploadStatus');
+  status.textContent = 'Yuklanmoqda...';
+  const fd = new FormData();
+  fd.append('image', file);
+  try {
+    const res = await fetch('/api/upload-image', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('imageUrlInput').value = data.url;
+      updatePreview(data.url);
+      status.textContent = '✅ Yuklandi';
+    } else {
+      status.textContent = '❌ ' + (data.error || 'Xatolik');
+    }
+  } catch { status.textContent = '❌ Yuklashda xatolik'; }
+  this.value = '';
+});
+
+function updatePreview(val) {
+  const wrap = document.getElementById('imgPreviewWrap');
+  const img  = document.getElementById('imgPreview');
+  if (val.trim()) {
+    wrap.style.display = 'block';
+    img.style.display  = 'block';
+    img.src = val.trim();
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+</script>

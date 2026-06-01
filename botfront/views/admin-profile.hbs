@@ -1,0 +1,210 @@
+<div class="page page-narrow">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Admin profil</h2>
+      <p class="page-sub">Shaxsiy ma'lumotlar va kirish ma'lumotlarini boshqarish</p>
+    </div>
+  </div>
+
+  {{! === Xabarnomalar === }}
+  {{#if (eq query.name_ok "1")}}<div class="alert alert-success">✅ Ism yangilandi.</div>{{/if}}
+  {{#if (eq query.cred_ok "1")}}<div class="alert alert-success">✅ Login va parol muvaffaqiyatli yangilandi.</div>{{/if}}
+  {{#if (eq query.cred_error "wrong_current")}}<div class="alert alert-error">❌ Joriy parol noto'g'ri.</div>{{/if}}
+  {{#if (eq query.cred_error "login_short")}}<div class="alert alert-error">❌ Login kamida 3 ta belgi bo'lishi kerak.</div>{{/if}}
+  {{#if (eq query.cred_error "pass_short")}}<div class="alert alert-error">❌ Yangi parol kamida 6 ta belgi bo'lishi kerak.</div>{{/if}}
+  {{#if (eq query.cred_error "pass_mismatch")}}<div class="alert alert-error">❌ Yangi parollar mos kelmadi.</div>{{/if}}
+  {{#if (eq query.avatar_ok "1")}}<div class="alert alert-success">✅ Profil rasmi yangilandi.</div>{{/if}}
+  {{#if (eq query.avatar_removed "1")}}<div class="alert alert-success">✅ Rasm o'chirildi.</div>{{/if}}
+  {{#if (eq query.avatar_error "invalid_file")}}<div class="alert alert-error">❌ Faqat JPG, PNG yoki WEBP (max 5MB).</div>{{/if}}
+
+  {{! === Avatar === }}
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-header"><h3 class="card-title">🖼 Profil rasmi</h3></div>
+    <div class="form" style="flex-direction:row;align-items:center;gap:24px;flex-wrap:wrap">
+      <div>
+        {{#if profile.avatar}}
+          <img src="{{profile.avatar}}" alt="avatar"
+               style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--border)">
+        {{else}}
+          <div style="width:80px;height:80px;border-radius:50%;background:#eef2ff;display:flex;align-items:center;justify-content:center;font-size:2rem;border:3px solid var(--border)">
+            {{#if profile.name}}{{profile.name.[0]}}{{else}}A{{/if}}
+          </div>
+        {{/if}}
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+        <div style="font-weight:600">{{profile.name}}</div>
+        <div style="font-size:13px;color:var(--muted)">Login: <code>{{profile.login}}</code></div>
+        <form method="POST" action="/admin/profile/avatar" enctype="multipart/form-data"
+              style="display:flex;gap:8px;flex-wrap:wrap">
+          <input class="input" type="file" name="avatar" accept="image/jpeg,image/png,image/webp"
+                 required style="flex:1;min-width:180px">
+          <button class="btn btn-primary" type="submit">📤 Yuklash</button>
+        </form>
+        {{#if profile.avatar}}
+        <form method="POST" action="/admin/profile/avatar/remove"
+              data-confirm="Rasmni o'chirishni tasdiqlaysizmi?">
+          <button class="btn btn-ghost btn-sm" type="submit">🗑 Rasmni o'chirish</button>
+        </form>
+        {{/if}}
+        <span class="field-hint">JPG, PNG yoki WEBP · max 5 MB · 200×200 px ga crop qilinadi</span>
+      </div>
+    </div>
+  </div>
+
+  {{! === Ism === }}
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-header"><h3 class="card-title">👤 Ismni o'zgartirish</h3></div>
+    <form method="POST" action="/admin/profile/name" class="form">
+      <label class="field">
+        <span class="field-label">Yangi ism</span>
+        <input class="input" type="text" name="name" value="{{profile.name}}" required minlength="2"
+               style="max-width:320px">
+      </label>
+      <div class="form-actions"><button class="btn btn-primary" type="submit">💾 Saqlash</button></div>
+    </form>
+  </div>
+
+  {{! === Login + Parol — BITTA FORMA === }}
+  <div class="card" style="margin-bottom:24px">
+    <div class="card-header"><h3 class="card-title">🔐 Login va parolni o'zgartirish</h3></div>
+    <form method="POST" action="/admin/profile/credentials" class="form" id="credForm">
+
+      {{! Joriy parol (majburiy tasdiqlash) }}
+      <label class="field">
+        <span class="field-label">Joriy parol <span class="req">*</span></span>
+        <div class="pw-wrap">
+          <input class="input" type="password" name="currentPassword"
+                 id="curPass" required autocomplete="current-password"
+                 placeholder="Hozirgi parolingiz">
+          <button type="button" class="pw-eye" onclick="togglePw('curPass',this)">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </label>
+
+      <div class="cred-divider">
+        <span>Yangi ma'lumotlar</span>
+      </div>
+
+      {{! Yangi login }}
+      <label class="field">
+        <span class="field-label">Yangi login <span class="req">*</span></span>
+        <input class="input" type="text" name="newLogin"
+               value="{{profile.login}}"
+               required minlength="3"
+               autocomplete="username"
+               style="max-width:320px"
+               placeholder="Kamida 3 ta belgi">
+      </label>
+
+      {{! Yangi parol (ixtiyoriy — bo'sh qolsa o'zgarmaydi) }}
+      <label class="field">
+        <span class="field-label">
+          Yangi parol
+          <span class="field-hint" style="font-weight:400;margin-left:4px">(bo'sh qolsa o'zgarmaydi)</span>
+        </span>
+        <div class="pw-wrap" style="max-width:360px">
+          <input class="input" type="password" name="newPassword"
+                 id="newPass" minlength="6"
+                 autocomplete="new-password"
+                 placeholder="Kamida 6 ta belgi"
+                 oninput="checkMatch()">
+          <button type="button" class="pw-eye" onclick="togglePw('newPass',this)">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </label>
+
+      <label class="field" id="confirmField" style="display:none">
+        <span class="field-label">Yangi parolni takrorlang <span class="req">*</span></span>
+        <div class="pw-wrap" style="max-width:360px">
+          <input class="input" type="password" name="confirmPassword"
+                 id="confPass"
+                 autocomplete="new-password"
+                 placeholder="Qaytadan kiriting"
+                 oninput="checkMatch()">
+          <button type="button" class="pw-eye" onclick="togglePw('confPass',this)">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <span id="matchHint" class="field-hint"></span>
+      </label>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit" id="credSubmit">💾 Saqlash</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+.pw-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.pw-wrap .input { padding-right: 40px; width: 100%; }
+.pw-eye {
+  position: absolute; right: 10px;
+  background: none; border: none; cursor: pointer;
+  padding: 0; color: var(--muted); opacity: .5;
+  display: flex; align-items: center;
+}
+.pw-eye:hover { opacity: 1; }
+
+.cred-divider {
+  display: flex; align-items: center; gap: 12px;
+  color: var(--muted); font-size: 12px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  margin: 4px 0;
+}
+.cred-divider::before, .cred-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+</style>
+
+<script>
+function togglePw(id, btn) {
+  const inp = document.getElementById(id);
+  const isText = inp.type === 'text';
+  inp.type = isText ? 'password' : 'text';
+  btn.style.opacity = isText ? '.5' : '1';
+}
+
+// Yangi parol yozilganda "Takrorlang" maydonini ko'rsatish
+document.getElementById('newPass').addEventListener('input', function() {
+  const cf = document.getElementById('confirmField');
+  cf.style.display = this.value ? 'flex' : 'none';
+  if (!this.value) {
+    document.getElementById('confPass').value = '';
+    document.getElementById('matchHint').textContent = '';
+    document.getElementById('credSubmit').disabled = false;
+  }
+});
+
+function checkMatch() {
+  const np = document.getElementById('newPass').value;
+  const cp = document.getElementById('confPass').value;
+  const hint = document.getElementById('matchHint');
+  const btn  = document.getElementById('credSubmit');
+  if (!cp) { hint.textContent = ''; btn.disabled = false; return; }
+  if (np === cp) {
+    hint.textContent = '✅ Parollar mos keldi';
+    hint.style.color = '#16a34a';
+    btn.disabled = false;
+  } else {
+    hint.textContent = '❌ Parollar mos kelmadi';
+    hint.style.color = '#dc2626';
+    btn.disabled = true;
+  }
+}
+
+document.getElementById('credForm').addEventListener('submit', function(e) {
+  const np = document.getElementById('newPass').value;
+  const cp = document.getElementById('confPass').value;
+  if (np && np !== cp) {
+    e.preventDefault();
+    alert('Yangi parollar mos kelmadi!');
+  }
+});
+</script>
